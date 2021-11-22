@@ -21,7 +21,6 @@ public class ColliderCallReceiver : MonoBehaviour
 
   void Start()
   {
-
   }
 
   // -------------------------------------------------------------------------
