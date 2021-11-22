@@ -18,6 +18,10 @@ public class PlayerController : MonoBehaviour
   bool isAttack = false;
   // 接地フラグ.
   bool isGround = false;
+  // PCキー横方向入力
+  float horizontalKeyInput = 0;
+  // PCキー縦方向入力
+  float verticalKeyInput = 0;
 
   // Start is called before the first frame update
   void Start()
@@ -32,14 +36,41 @@ public class PlayerController : MonoBehaviour
     // FootSphereのイベント登録.
     footColliderCall.TriggerStayEvent.AddListener(OnFootTriggerStay);
     footColliderCall.TriggerExitEvent.AddListener(OnFootTriggerExit);
-    Debug.Log(animator.GetBool("isGround"));
-
   }
 
   // Update is called once per frame
   void Update()
   {
+    horizontalKeyInput = Input.GetAxis("Horizontal");
+    verticalKeyInput = Input.GetAxis("Vertical");
 
+    bool isKeyInput = (horizontalKeyInput != 0 || verticalKeyInput != 0);
+    if (isKeyInput == true && isAttack == false)
+    {
+      bool currentIsRun = animator.GetBool("isRun");
+      if (currentIsRun == false) animator.SetBool("isRun", true);
+      Vector3 dir = rigid.velocity.normalized;
+      dir.y = 0;
+      this.transform.forward = dir;
+    }
+    else
+    {
+      bool currentIsRun = animator.GetBool("isRun");
+      if (currentIsRun == true) animator.SetBool("isRun", false);
+    }
+  }
+
+  void FixedUpdate()
+  {
+    if (isAttack == false)
+    {
+      Vector3 input = new Vector3(horizontalKeyInput, 0, verticalKeyInput);
+      Vector3 move = input.normalized * 2f;
+      Vector3 cameraMove = Camera.main.gameObject.transform.rotation * move;
+      cameraMove.y = 0;
+
+      rigid.AddForce(cameraMove - rigid.velocity, ForceMode.VelocityChange);
+    }
   }
 
   // ---------------------------------------------------------------------
