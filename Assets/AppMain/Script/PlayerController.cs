@@ -4,6 +4,26 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+  // -------------------------------------------------------
+  /// <summary>
+  /// ステータス.
+  /// </summary>
+  // -------------------------------------------------------
+  [System.Serializable]
+  public class Status
+  {
+    // 体力.
+    public int Hp = 10;
+    // 攻撃力.
+    public int Power = 1;
+  }
+
+  // 攻撃HitオブジェクトのColliderCall.
+  [SerializeField] ColliderCallReceiver attackHitCall = null;
+  // 基本ステータス.
+  [SerializeField] Status DefaultStatus = new Status();
+  // 現在のステータス.
+  public Status CurrentStatus = new Status();
   // 攻撃判定用オブジェクト.
   [SerializeField] GameObject attackHit = null;
   // 設置判定用ColliderCall.
@@ -41,6 +61,11 @@ public class PlayerController : MonoBehaviour
     // FootSphereのイベント登録.
     footColliderCall.TriggerEnterEvent.AddListener(OnFootTriggerEnter);
     footColliderCall.TriggerExitEvent.AddListener(OnFootTriggerExit);
+    // 攻撃判定用コライダーイベント登録.
+    attackHitCall.TriggerEnterEvent.AddListener(OnAttackHitTriggerEnter);
+    // 現在のステータスの初期化.
+    CurrentStatus.Hp = DefaultStatus.Hp;
+    CurrentStatus.Power = DefaultStatus.Power;
   }
 
   // Update is called once per frame
@@ -263,5 +288,21 @@ public class PlayerController : MonoBehaviour
     attackHit.SetActive(false);
     // 攻撃終了.
     isAttack = false;
+  }
+
+  // ---------------------------------------------------------------------
+  /// <summary>
+  /// 攻撃判定トリガーエンターイベントコール.
+  /// </summary>
+  /// <param name="col"> 侵入したコライダー. </param>
+  // ---------------------------------------------------------------------
+  void OnAttackHitTriggerEnter(Collider col)
+  {
+    if (col.gameObject.tag == "Enemy")
+    {
+      var enemy = col.gameObject.GetComponent<EnemyBase>();
+      enemy?.OnAttackHit(CurrentStatus.Power);
+      attackHit.SetActive(false);
+    }
   }
 }
